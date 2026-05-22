@@ -37,43 +37,51 @@ export default function Home() {
 
   if (user) {
     const fields: { label: string; value: string | null | undefined }[] = [
-      { label: "ID",              value: user.id },
-      { label: "E-post",          value: user.email },
-      { label: "Telefon",         value: user.phone },
-      { label: "Opprettet",       value: user.created_at ? new Date(user.created_at).toLocaleString("no-NO") : null },
-      { label: "Sist innlogget",  value: user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString("no-NO") : null },
+      { label: "ID",               value: user.id },
+      { label: "E-post",           value: user.email },
+      { label: "Telefon",          value: user.phone },
+      { label: "Opprettet",        value: user.created_at ? new Date(user.created_at).toLocaleString("no-NO") : null },
+      { label: "Sist innlogget",   value: user.last_sign_in_at ? new Date(user.last_sign_in_at).toLocaleString("no-NO") : null },
       { label: "Påloggingsmetode", value: user.app_metadata?.provider },
     ]
 
     return (
-      <div style={{ padding: 20, fontFamily: "sans-serif" }}>
-        <h1>Velkommen, {user.email}!</h1>
+      <div style={{ fontFamily: "sans-serif" }}>
+        <header style={{
+          display: "flex", alignItems: "center", justifyContent: "space-between",
+          padding: "12px 20px", borderBottom: "1px solid #e5e7eb", background: "#fff",
+        }}>
+          <span style={{ fontWeight: 600 }}>{user.email}</span>
+          <button onClick={signOut}>Logg ut</button>
+        </header>
 
-        <table style={{ borderCollapse: "collapse", marginTop: 16 }}>
-          <tbody>
-            {fields.map(({ label, value }) =>
-              value ? (
-                <tr key={label}>
-                  <td style={{ fontWeight: "bold", paddingRight: 24, paddingBottom: 8, verticalAlign: "top" }}>
-                    {label}
-                  </td>
-                  <td style={{ paddingBottom: 8 }}>{value}</td>
-                </tr>
-              ) : null
-            )}
-          </tbody>
-        </table>
+        <main style={{ padding: 20 }}>
+          <h1>Velkommen!</h1>
 
-        {Object.keys(user.user_metadata ?? {}).length > 0 && (
-          <details style={{ marginTop: 16 }}>
-            <summary style={{ cursor: "pointer", fontWeight: "bold" }}>Brukerdata</summary>
-            <pre style={{ marginTop: 8, background: "#f4f4f4", padding: 12, borderRadius: 4 }}>
-              {JSON.stringify(user.user_metadata, null, 2)}
-            </pre>
-          </details>
-        )}
+          <table style={{ borderCollapse: "collapse", marginTop: 16 }}>
+            <tbody>
+              {fields.map(({ label, value }) =>
+                value ? (
+                  <tr key={label}>
+                    <td style={{ fontWeight: "bold", paddingRight: 24, paddingBottom: 8, verticalAlign: "top" }}>
+                      {label}
+                    </td>
+                    <td style={{ paddingBottom: 8 }}>{value}</td>
+                  </tr>
+                ) : null
+              )}
+            </tbody>
+          </table>
 
-        <button onClick={signOut} style={{ marginTop: 24 }}>Logg ut</button>
+          {Object.keys(user.user_metadata ?? {}).length > 0 && (
+            <details style={{ marginTop: 16 }}>
+              <summary style={{ cursor: "pointer", fontWeight: "bold" }}>Brukerdata</summary>
+              <pre style={{ marginTop: 8, background: "#f4f4f4", padding: 12, borderRadius: 4 }}>
+                {JSON.stringify(user.user_metadata, null, 2)}
+              </pre>
+            </details>
+          )}
+        </main>
       </div>
     )
   }
