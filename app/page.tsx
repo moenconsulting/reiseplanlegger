@@ -73,9 +73,9 @@ function HomePage({ onLoginClick }: { onLoginClick: () => void }) {
       </p>
       <button
         onClick={onLoginClick}
-        className="px-6 py-3 bg-black text-white rounded-full text-sm font-medium
-                   hover:bg-gray-800 transition-colors
-                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+        className="px-6 py-3 bg-blue-700 text-white rounded-full text-sm font-medium
+                   hover:bg-blue-800 transition-colors
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
       >
         Logg inn
       </button>

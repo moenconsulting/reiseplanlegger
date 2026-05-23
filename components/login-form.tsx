@@ -9,9 +9,10 @@ type Props = {
 
 type Mode = "password" | "magic-link"
 
-// Reusable focus ring — keyboard-only, does not appear on mouse click
+// Reusable focus ring — keyboard-only, does not appear on mouse click.
+// Uses blue-700 (#1D4ED8) to match the primary accent colour (6.6:1 on white).
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
 
 export default function LoginForm({ onBack }: Props) {
   const [mode, setMode]         = useState<Mode>("password")
@@ -66,14 +67,14 @@ export default function LoginForm({ onBack }: Props) {
   ].join(" ")
 
   const primaryBtn = [
-    "w-full py-2 bg-black text-white rounded text-sm font-medium",
-    "hover:bg-gray-800 transition-colors",
+    "w-full py-2 bg-blue-700 text-white rounded text-sm font-medium",
+    "hover:bg-blue-800 transition-colors",
     "disabled:opacity-50 disabled:cursor-not-allowed",
     focusRing,
   ].join(" ")
 
   const secondaryBtn = [
-    "text-sm text-gray-600 hover:text-black underline underline-offset-2 transition-colors rounded",
+    "text-sm text-blue-700 hover:text-blue-800 underline underline-offset-2 transition-colors rounded",
     focusRing,
   ].join(" ")
 

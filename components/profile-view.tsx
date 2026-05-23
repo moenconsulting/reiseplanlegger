@@ -55,7 +55,10 @@ export default function ProfileView({ user }: Props) {
                               focus-visible:ring-offset-2">
             Brukerdata (user_metadata)
           </summary>
-          <pre className="mt-3 bg-gray-50 border border-gray-100 rounded p-4 text-xs overflow-x-auto">
+          {/* explicit text-gray-900: prevents invisible text if a parent or
+              browser dark-mode makes the inherited colour light on this
+              light bg-gray-50 surface. Contrast #111827 on #f9fafb = 18:1 ✓ */}
+          <pre className="mt-3 bg-gray-50 border border-gray-100 rounded p-4 text-xs text-gray-900 overflow-x-auto">
             {JSON.stringify(user.user_metadata, null, 2)}
           </pre>
         </details>
