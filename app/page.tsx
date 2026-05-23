@@ -24,7 +24,6 @@ export default function Home() {
       (_event, session) => {
         const nextUser = session?.user ?? null
         setUser(nextUser)
-        // After login → welcome; after logout → home
         setView(nextUser ? "welcome" : "home")
         setMounted(true)
       }
@@ -46,15 +45,18 @@ export default function Home() {
         user={user}
         view={view}
         onLoginClick={() => setView("login")}
-        onProfileClick={() => setView(view === "profile" ? "welcome" : "profile")}
+        onHomeClick={() => setView("welcome")}
+        onProfileClick={() => setView("profile")}
         onSignOut={signOut}
       />
 
-      <main className="flex-1">
-        {!user && view === "home"  && <HomePage onLoginClick={() => setView("login")} />}
-        {!user && view === "login" && <LoginForm onBack={() => setView("home")} />}
+      {/* tabIndex={-1}: allows skip link to programmatically focus this element */}
+      {/* outline-none: suppresses the browser's default focus ring on the container */}
+      <main id="main-content" tabIndex={-1} className="flex-1 outline-none">
+        {!user && view === "home"    && <HomePage onLoginClick={() => setView("login")} />}
+        {!user && view === "login"   && <LoginForm onBack={() => setView("home")} />}
         {user  && view === "welcome" && <WelcomeView user={user} />}
-        {user  && view === "profile" && <ProfileView user={user} onBack={() => setView("welcome")} />}
+        {user  && view === "profile" && <ProfileView user={user} />}
       </main>
     </div>
   )
@@ -66,12 +68,14 @@ function HomePage({ onLoginClick }: { onLoginClick: () => void }) {
   return (
     <section className="flex flex-col items-center justify-center min-h-[70vh] gap-6 px-4 text-center">
       <h1 className="text-4xl font-bold tracking-tight">Reiseplanlegger</h1>
-      <p className="text-lg text-gray-500 max-w-md">
+      <p className="text-lg text-gray-600 max-w-md">
         Planlegg reisen din enkelt og effektivt. Logg inn for å komme i gang.
       </p>
       <button
         onClick={onLoginClick}
-        className="px-6 py-3 bg-black text-white rounded-full text-sm font-medium hover:bg-gray-800 transition-colors"
+        className="px-6 py-3 bg-black text-white rounded-full text-sm font-medium
+                   hover:bg-gray-800 transition-colors
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-black focus-visible:ring-offset-2"
       >
         Logg inn
       </button>
