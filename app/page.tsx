@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import type { User } from "@supabase/supabase-js"
-import { supabase } from "@/lib/supabase"
+import { getSupabase } from "@/lib/supabase"
 import SiteHeader from "@/components/site-header"
 import LoginForm from "@/components/login-form"
 import WelcomeView from "@/components/welcome-view"
@@ -21,7 +21,7 @@ export default function Home() {
   useEffect(() => {
     // Fires immediately with current session (localStorage) and again when a
     // magic-link token in the URL hash is exchanged. Keeps view in sync.
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+    const { data: { subscription } } = getSupabase().auth.onAuthStateChange(
       (_event, session) => {
         const nextUser = session?.user ?? null
         setUser(nextUser)
@@ -33,7 +33,7 @@ export default function Home() {
   }, [])
 
   async function signOut() {
-    await supabase.auth.signOut()
+    await getSupabase().auth.signOut()
     // onAuthStateChange above resets user + view automatically
   }
 

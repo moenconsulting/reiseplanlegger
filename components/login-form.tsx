@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { getSupabase } from "@/lib/supabase"
 
 type Props = {
   onBack: () => void
@@ -33,7 +33,7 @@ export default function LoginForm({ onBack }: Props) {
     setError(null)
     setLoading(true)
     try {
-      const { error } = await supabase.auth.signInWithPassword({ email, password })
+      const { error } = await getSupabase().auth.signInWithPassword({ email, password })
       // Generic message — avoids leaking whether an email address is registered
       if (error) setError("Feil e-post eller passord.")
       // On success: onAuthStateChange in page.tsx switches view automatically
@@ -47,7 +47,7 @@ export default function LoginForm({ onBack }: Props) {
     setError(null)
     setLoading(true)
     try {
-      const { error } = await supabase.auth.signInWithOtp({
+      const { error } = await getSupabase().auth.signInWithOtp({
         email,
         options: { shouldCreateUser: false }, // Never create new users via OTP
       })
