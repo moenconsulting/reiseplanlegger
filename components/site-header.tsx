@@ -9,6 +9,7 @@ type Props = {
   onLoginClick: () => void
   onHomeClick: () => void
   onProfileClick: () => void
+  onAdminClick: () => void
   onSignOut: () => void
 }
 
@@ -23,6 +24,7 @@ export default function SiteHeader({
   onLoginClick,
   onHomeClick,
   onProfileClick,
+  onAdminClick,
   onSignOut,
 }: Props) {
   const [profileOpen, setProfileOpen] = useState(false)
@@ -209,6 +211,21 @@ export default function SiteHeader({
                 >
                   Vis kontoinformasjon
                 </button>
+
+                <button
+                  role="menuitem"
+                  onClick={() => closeAndNavigate(onAdminClick)}
+                  className={[
+                    "w-full text-left px-4 py-2 text-sm text-gray-700",
+                    "hover:bg-gray-50 transition-colors",
+                    focusRing,
+                  ].join(" ")}
+                >
+                  Send invitasjon
+                </button>
+
+                {/* Divider before destructive action */}
+                <div className="my-1 border-t border-gray-100" role="separator" />
 
                 <button
                   role="menuitem"
