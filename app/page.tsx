@@ -93,15 +93,18 @@ export default function Home() {
 function HomePage({ onLoginClick }: { onLoginClick: () => void }) {
   return (
     <section className="flex flex-col items-center justify-center min-h-[70vh] gap-6 px-4 text-center">
-      <h1 className="text-4xl font-bold tracking-tight">Reiseplanlegger</h1>
-      <p className="text-lg text-gray-600 max-w-md">
+      <h1 className="text-4xl font-bold tracking-tight text-gray-900 dark:text-gray-50">
+        Reiseplanlegger
+      </h1>
+      <p className="text-lg text-gray-600 dark:text-gray-400 max-w-md">
         Planlegg reisen din enkelt og effektivt. Logg inn for å komme i gang.
       </p>
       <button
         onClick={onLoginClick}
-        className="px-6 py-3 bg-blue-700 text-white rounded-full text-sm font-medium
-                   hover:bg-blue-800 transition-colors
-                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
+        className="px-6 py-3 bg-blue-700 dark:bg-blue-600 text-white rounded-full text-sm font-medium
+                   hover:bg-blue-800 dark:hover:bg-blue-500 transition-colors
+                   focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700
+                   focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
       >
         Logg inn
       </button>

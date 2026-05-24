@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from "react"
 import type { User } from "@supabase/supabase-js"
+import ThemeToggle from "@/components/theme-toggle"
 
 type Props = {
   user: User | null
@@ -16,10 +17,11 @@ type Props = {
   onSignOut: () => void
 }
 
-// Accent colour: #1D4ED8 (blue-700) — used for active states, focus rings,
-// and primary interactive elements. Contrast on white = 6.6:1 (WCAG AA ✓).
+// Keyboard-only focus ring. ring-offset matches the header/page background
+// in both themes (white in light, gray-900 in dark).
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 " +
+  "focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900"
 
 // ── Inline SVG atoms ─────────────────────────────────────────────────────────
 // All SVGs carry aria-hidden="true"; meaningful labels are on the parent
@@ -144,25 +146,26 @@ export default function SiteHeader({
   }
 
   return (
-    <header className="sticky top-0 z-10 flex items-center gap-3 px-6 py-3 border-b border-gray-300 bg-white">
+    // Light: white bg, gray-300 border
+    // Dark:  gray-900 bg, gray-700 border
+    <header className="sticky top-0 z-10 flex items-center gap-3 px-6 py-3
+                       bg-white dark:bg-gray-900 border-b border-gray-300 dark:border-gray-700">
 
-      {/* ── Brand ────────────────────────────────────────────────────────── *
-       * Button (not <span>) so it is keyboard-reachable.                   *
-       * text-gray-900 = #111827 → contrast on white 19.6:1 (WCAG AA ✓).   */}
+      {/* ── Brand ────────────────────────────────────────────────────────── */}
       <button
         onClick={onHomeClick}
         aria-label="Reiseplanlegger – gå til startsiden"
         className={[
-          "font-bold text-gray-900 shrink-0 hover:text-blue-700 transition-colors rounded",
+          "font-bold shrink-0 transition-colors rounded",
+          "text-gray-900 dark:text-gray-50",
+          "hover:text-blue-700 dark:hover:text-blue-400",
           focusRing,
         ].join(" ")}
       >
         Reiseplanlegger
       </button>
 
-      {/* ── In-app nav (logged in) ────────────────────────────────────────
-        * Only "Hjem" remains here. Profile navigation moved to the right-  *
-        * side profile control. aria-current="page" marks the active view.  */}
+      {/* ── In-app nav (logged in) ────────────────────────────────────────── */}
       {user && (
         <nav aria-label="Sidenavigasjon" className="flex items-center">
           <button
@@ -172,8 +175,10 @@ export default function SiteHeader({
               "text-sm px-3 py-1.5 rounded transition-colors",
               focusRing,
               view === "welcome"
-                ? "bg-blue-700 text-white"
-                : "text-gray-700 hover:bg-gray-100",
+                // Active: solid primary button
+                ? "bg-blue-700 dark:bg-blue-600 text-white"
+                // Inactive: muted text, subtle hover
+                : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800",
             ].join(" ")}
           >
             Hjem
@@ -184,13 +189,17 @@ export default function SiteHeader({
       {/* ── Right side ───────────────────────────────────────────────────── */}
       <div className="ml-auto flex items-center gap-2 shrink-0">
 
-        {/* Logged-out: simple login button */}
+        {/* Theme toggle — always visible */}
+        <ThemeToggle />
+
+        {/* Logged-out: login button */}
         {!user && (
           <button
             onClick={onLoginClick}
             className={[
-              "text-sm px-4 py-1.5 bg-blue-700 text-white rounded-full",
-              "hover:bg-blue-800 transition-colors",
+              "text-sm px-4 py-1.5 rounded-full transition-colors text-white",
+              "bg-blue-700 dark:bg-blue-600",
+              "hover:bg-blue-800 dark:hover:bg-blue-500",
               focusRing,
             ].join(" ")}
           >
@@ -198,17 +207,15 @@ export default function SiteHeader({
           </button>
         )}
 
-        {/* Logged-in: profile control + dropdown ──────────────────────────
+        {/* Logged-in: profile trigger + dropdown ──────────────────────────
          *
          * Admin visual distinction (WCAG 1.4.1 — not colour alone):
-         *   Trigger  — blue-700 shield icon + sr-only "Administrator" text
-         *              between the person icon and email; blue-200 border.
-         *   Dropdown — shield icon + visible "Administrator" label in the
-         *              identity row (blue-700).
+         *   Trigger  — blue shield icon + sr-only "Administrator" text;
+         *              blue-tinted border.
+         *   Dropdown — shield icon + visible "Administrator" label.
          *   a11y     — aria-label prefixed with "Administrator" for admins.
          *
-         * Non-admin users see the plain trigger with gray-300 border and no
-         * badge; "Send invitasjon" is hidden from the dropdown entirely.    */}
+         * Non-admin: plain trigger with standard gray border.               */}
         {user && (
           <div ref={wrapperRef} className="relative">
             <button
@@ -222,10 +229,11 @@ export default function SiteHeader({
                   : `Profil for ${user.email} – åpne profil-meny`
               }
               className={[
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors text-sm text-gray-900",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors",
+                "text-sm text-gray-900 dark:text-gray-100",
                 isAdmin
-                  ? "border-blue-200 hover:bg-blue-50"
-                  : "border-gray-300 hover:bg-gray-50",
+                  ? "border-blue-300 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                  : "border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800",
                 focusRing,
               ].join(" ")}
             >
@@ -235,13 +243,10 @@ export default function SiteHeader({
                * icon (aria-hidden) + sr-only text satisfies WCAG 1.4.1:
                * information is not conveyed by colour alone.              */}
               {isAdmin && (
-                <span className="text-blue-700 flex items-center" aria-hidden="true">
+                <span className="flex items-center text-blue-700 dark:text-blue-400" aria-hidden="true">
                   <ShieldIcon size="sm" />
                 </span>
               )}
-              {/* Screen-reader-only role announcement lives here so it is
-                  always announced as part of the button label, regardless
-                  of the viewport width that hides the email span below.   */}
               {isAdmin && <span className="sr-only">Administrator –</span>}
 
               <span className="hidden sm:block max-w-[160px] truncate">
@@ -252,58 +257,68 @@ export default function SiteHeader({
             </button>
 
             {/* ── Profile dropdown panel ──────────────────────────────────
-             * Anchored to the right edge of the trigger via right-0.       *
-             * z-50 so it floats above page content.                        *
-             * Items use role="menuitem" for screen-reader semantics.       */}
+             * Anchored to the right edge of the trigger via right-0.
+             * z-50 so it floats above page content.
+             * role="menu" + role="menuitem" for screen-reader semantics.  */}
             {profileOpen && (
               <div
                 role="menu"
                 aria-label="Profil-meny"
-                className="absolute right-0 top-full mt-1 w-64 bg-white border border-gray-200 rounded-lg shadow-lg z-50 py-2"
+                className={[
+                  "absolute right-0 top-full mt-1 w-64 rounded-lg shadow-lg z-50 py-2",
+                  // Light: white card, gray-200 border
+                  // Dark:  gray-800 card, gray-700 border
+                  "bg-white dark:bg-gray-800",
+                  "border border-gray-200 dark:border-gray-700",
+                ].join(" ")}
               >
                 {/* Identity row */}
-                <div className="px-4 py-2 border-b border-gray-100 mb-1">
-                  <p className="text-xs text-gray-500 mb-0.5">Innlogget som</p>
+                <div className="px-4 py-2 border-b border-gray-100 dark:border-gray-700 mb-1">
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mb-0.5">
+                    Innlogget som
+                  </p>
 
-                  {/* Administrator badge — icon + text label (not colour alone) */}
+                  {/* Administrator badge — icon + text (not colour alone) */}
                   {isAdmin && (
-                    <p className="flex items-center gap-1 text-xs font-semibold text-blue-700 mb-1">
+                    <p className="flex items-center gap-1 text-xs font-semibold mb-1 text-blue-700 dark:text-blue-400">
                       <ShieldIcon size="xs" />
                       Administrator
                     </p>
                   )}
 
-                  {/* explicit text-gray-900 prevents invisible text if background
-                      ever changes — contrast 19.6:1 on white (WCAG AA ✓)       */}
-                  <p className="text-sm font-medium text-gray-900 break-all">
+                  <p className="text-sm font-medium break-all text-gray-900 dark:text-gray-100">
                     {user.email}
                   </p>
                 </div>
 
+                {/* Menu items — hover: subtle tinted bg */}
                 <button
                   ref={firstItemRef}
                   role="menuitem"
                   onClick={() => closeAndNavigate(onProfileClick)}
                   className={[
-                    "w-full text-left px-4 py-2 text-sm text-gray-700",
-                    "hover:bg-gray-50 transition-colors",
-                    focusRing,
+                    "w-full text-left px-4 py-2 text-sm transition-colors",
+                    "text-gray-700 dark:text-gray-200",
+                    "hover:bg-gray-50 dark:hover:bg-gray-700",
+                    // ring-offset matches the dropdown card bg (gray-800 in dark)
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700",
+                    "focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800",
                   ].join(" ")}
                 >
                   Vis kontoinformasjon
                 </button>
 
-                {/* Admin-only action ─────────────────────────────────────
-                 * Hidden for non-admin users so they never see or reach it.
-                 * Server-side auth still enforces access independently.   */}
+                {/* Admin-only: server-side auth still enforces access */}
                 {isAdmin && (
                   <button
                     role="menuitem"
                     onClick={() => closeAndNavigate(onAdminClick)}
                     className={[
-                      "w-full text-left px-4 py-2 text-sm text-gray-700",
-                      "hover:bg-gray-50 transition-colors",
-                      focusRing,
+                      "w-full text-left px-4 py-2 text-sm transition-colors",
+                      "text-gray-700 dark:text-gray-200",
+                      "hover:bg-gray-50 dark:hover:bg-gray-700",
+                      "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700",
+                      "focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800",
                     ].join(" ")}
                   >
                     Send invitasjon
@@ -311,15 +326,18 @@ export default function SiteHeader({
                 )}
 
                 {/* Divider before destructive action */}
-                <div className="my-1 border-t border-gray-100" role="separator" />
+                <div className="my-1 border-t border-gray-100 dark:border-gray-700" role="separator" />
 
+                {/* Logout — red text, subtle red hover */}
                 <button
                   role="menuitem"
                   onClick={() => closeAndNavigate(onSignOut)}
                   className={[
-                    "w-full text-left px-4 py-2 text-sm text-red-600",
-                    "hover:bg-red-50 transition-colors",
-                    focusRing,
+                    "w-full text-left px-4 py-2 text-sm transition-colors",
+                    "text-red-600 dark:text-red-400",
+                    "hover:bg-red-50 dark:hover:bg-red-900/20",
+                    "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700",
+                    "focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800",
                   ].join(" ")}
                 >
                   Logg ut

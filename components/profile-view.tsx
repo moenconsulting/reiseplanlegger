@@ -25,18 +25,23 @@ export default function ProfileView({ user }: Props) {
 
   return (
     <div className="max-w-xl mx-auto px-4 py-10">
-      <h1 className="text-2xl font-bold mb-6">Kontoinformasjon</h1>
+      <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-50">
+        Kontoinformasjon
+      </h1>
 
       <table className="w-full text-sm border-collapse">
         <tbody>
           {fields.map(({ label, value }) =>
             value ? (
-              <tr key={label} className="border-b border-gray-100">
-                {/* gray-600 = 7.1:1 on white — WCAG AA ✓ (was gray-400 = 2.4:1 ✗) */}
-                <td className="py-3 pr-8 text-sm font-medium text-gray-600 whitespace-nowrap align-top w-44">
+              <tr key={label} className="border-b border-gray-100 dark:border-gray-700">
+                {/* Label: muted in both themes, WCAG AA contrast ✓ */}
+                <td className="py-3 pr-8 text-sm font-medium whitespace-nowrap align-top w-44
+                               text-gray-600 dark:text-gray-400">
                   {label}
                 </td>
-                <td className="py-3 font-mono text-xs break-all">
+                {/* Value: primary text in both themes */}
+                <td className="py-3 font-mono text-xs break-all
+                               text-gray-900 dark:text-gray-100">
                   {value}
                 </td>
               </tr>
@@ -47,18 +52,20 @@ export default function ProfileView({ user }: Props) {
 
       {hasMetadata && (
         <details className="mt-6">
-          {/* focus-visible ring on <summary> for keyboard discoverability */}
-          <summary className="cursor-pointer text-sm font-medium text-gray-600
-                              hover:text-black transition-colors
+          <summary className="cursor-pointer text-sm font-medium transition-colors
+                              text-gray-600 dark:text-gray-400
+                              hover:text-gray-900 dark:hover:text-gray-50
                               focus-visible:outline-none focus-visible:ring-2
-                              focus-visible:ring-black focus-visible:rounded
-                              focus-visible:ring-offset-2">
+                              focus-visible:ring-blue-700 focus-visible:rounded
+                              focus-visible:ring-offset-2
+                              dark:focus-visible:ring-offset-gray-900">
             Brukerdata (user_metadata)
           </summary>
-          {/* explicit text-gray-900: prevents invisible text if a parent or
-              browser dark-mode makes the inherited colour light on this
-              light bg-gray-50 surface. Contrast #111827 on #f9fafb = 18:1 ✓ */}
-          <pre className="mt-3 bg-gray-50 border border-gray-100 rounded p-4 text-xs text-gray-900 overflow-x-auto">
+          {/* Muted surface, matching border, always-readable monospace text */}
+          <pre className="mt-3 rounded p-4 text-xs overflow-x-auto
+                          bg-gray-50 dark:bg-gray-800
+                          border border-gray-100 dark:border-gray-700
+                          text-gray-900 dark:text-gray-100">
             {JSON.stringify(user.user_metadata, null, 2)}
           </pre>
         </details>

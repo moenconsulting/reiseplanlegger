@@ -9,10 +9,11 @@ type Props = {
 
 type Mode = "password" | "magic-link"
 
-// Reusable focus ring — keyboard-only, does not appear on mouse click.
-// Uses blue-700 (#1D4ED8) to match the primary accent colour (6.6:1 on white).
+// Focus ring: blue-700 matches the primary accent; ring-offset matches the
+// card background (white / gray-800) so the gap reads correctly in both themes.
 const focusRing =
-  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
+  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 " +
+  "focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800"
 
 export default function LoginForm({ onBack }: Props) {
   const [mode, setMode]         = useState<Mode>("password")
@@ -61,68 +62,90 @@ export default function LoginForm({ onBack }: Props) {
     }
   }
 
+  // Input: white/gray-700 bg, visible border in both themes, correct text + placeholder
   const inputClass = [
-    "w-full border border-gray-300 rounded px-3 py-2 text-sm",
-    "focus:outline-none focus-visible:ring-2 focus-visible:ring-black",
+    "w-full rounded px-3 py-2 text-sm",
+    "bg-white dark:bg-gray-700",
+    "text-gray-900 dark:text-gray-100",
+    "placeholder:text-gray-400 dark:placeholder:text-gray-500",
+    "border border-gray-300 dark:border-gray-600",
+    "focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-700",
+    "focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-800",
   ].join(" ")
 
   const primaryBtn = [
-    "w-full py-2 bg-blue-700 text-white rounded text-sm font-medium",
-    "hover:bg-blue-800 transition-colors",
+    "w-full py-2 rounded text-sm font-medium transition-colors text-white",
+    "bg-blue-700 dark:bg-blue-600",
+    "hover:bg-blue-800 dark:hover:bg-blue-500",
     "disabled:opacity-50 disabled:cursor-not-allowed",
     focusRing,
   ].join(" ")
 
   const secondaryBtn = [
-    "text-sm text-blue-700 hover:text-blue-800 underline underline-offset-2 transition-colors rounded",
+    "text-sm underline underline-offset-2 transition-colors rounded",
+    "text-blue-700 dark:text-blue-400",
+    "hover:text-blue-800 dark:hover:text-blue-300",
     focusRing,
   ].join(" ")
 
   return (
-    // Light gray page background creates visible contrast behind the white card
-    <div className="min-h-[70vh] flex items-center justify-center bg-gray-50 px-4 py-12">
+    // Page bg: gray-50 / gray-950 — darker than the card so the card reads as elevated
+    <div className="min-h-[70vh] flex items-center justify-center px-4 py-12
+                    bg-gray-50 dark:bg-gray-950">
       {/*
-        Card: constrained to 420 px (within the 360–480 px spec), white background,
-        border + shadow so it reads as a distinct surface against the gray page.
+        Card: white / gray-800 surface, border + shadow so it reads as distinct
+        from the muted page background in both themes.
       */}
-      <div className="w-full max-w-[420px] bg-white border border-gray-200 rounded-xl shadow-sm px-8 py-10">
+      <div className="w-full max-w-[420px] rounded-xl shadow-sm px-8 py-10
+                      bg-white dark:bg-gray-800
+                      border border-gray-200 dark:border-gray-700">
 
         {/* Back to home */}
         <button
           onClick={onBack}
-          className={["flex items-center gap-1 text-sm text-gray-600 hover:text-black mb-8 transition-colors rounded", focusRing].join(" ")}
+          className={[
+            "flex items-center gap-1 text-sm mb-8 transition-colors rounded",
+            "text-gray-600 dark:text-gray-400",
+            "hover:text-gray-900 dark:hover:text-gray-50",
+            focusRing,
+          ].join(" ")}
         >
           ← Tilbake
         </button>
 
-        <h1 className="text-2xl font-bold mb-6">
+        <h1 className="text-2xl font-bold mb-6 text-gray-900 dark:text-gray-50">
           {mode === "password" ? "Logg inn" : "Send innloggingslenke"}
         </h1>
 
         {/*
-          aria-live="polite": screen readers announce feedback messages when they
-          appear, without interrupting what is currently being read.
+          aria-live="polite": screen readers announce feedback without
+          interrupting what is currently being read.
           aria-atomic="true": read the entire region as a single unit.
         */}
         <div aria-live="polite" aria-atomic="true" className="mb-4 empty:hidden">
           {error && (
-            <p role="alert" className="px-4 py-2 text-sm text-red-700 bg-red-50 border border-red-200 rounded">
+            <p role="alert" className="px-4 py-2 text-sm rounded border
+                                       text-red-700 dark:text-red-400
+                                       bg-red-50 dark:bg-red-900/20
+                                       border-red-200 dark:border-red-800">
               {error}
             </p>
           )}
           {info && (
-            <p role="status" className="px-4 py-2 text-sm text-green-700 bg-green-50 border border-green-200 rounded">
+            <p role="status" className="px-4 py-2 text-sm rounded border
+                                        text-green-700 dark:text-green-400
+                                        bg-green-50 dark:bg-green-900/20
+                                        border-green-200 dark:border-green-800">
               {info}
             </p>
           )}
         </div>
 
-        {/* ── Password login (primary) ──────────────────────────────────── */}
+        {/* ── Password login ────────────────────────────────────────────── */}
         {mode === "password" && (
           <form onSubmit={handlePasswordLogin} className="flex flex-col gap-4" noValidate>
             <div className="flex flex-col gap-1.5">
-              {/* Visible <label> — not placeholder-only, satisfies WCAG 1.3.1 */}
-              <label htmlFor="login-email" className="text-sm font-medium text-gray-700">
+              <label htmlFor="login-email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 E-post
               </label>
               <input
@@ -137,7 +160,7 @@ export default function LoginForm({ onBack }: Props) {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="login-password" className="text-sm font-medium text-gray-700">
+              <label htmlFor="login-password" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 Passord
               </label>
               <input
@@ -157,11 +180,11 @@ export default function LoginForm({ onBack }: Props) {
           </form>
         )}
 
-        {/* ── Magic-link login (secondary / existing users only) ─────────── */}
+        {/* ── Magic-link login ──────────────────────────────────────────── */}
         {mode === "magic-link" && (
           <form onSubmit={handleMagicLink} className="flex flex-col gap-4" noValidate>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="otp-email" className="text-sm font-medium text-gray-700">
+              <label htmlFor="otp-email" className="text-sm font-medium text-gray-700 dark:text-gray-300">
                 E-post
               </label>
               <input
@@ -186,7 +209,7 @@ export default function LoginForm({ onBack }: Props) {
         )}
 
         {/* ── Mode toggle ───────────────────────────────────────────────── */}
-        <div className="mt-6 pt-6 border-t border-gray-100 text-center">
+        <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700 text-center">
           {mode === "password" ? (
             <button onClick={() => switchMode("magic-link")} className={secondaryBtn}>
               Logg inn med e-postlenke i stedet
@@ -198,8 +221,8 @@ export default function LoginForm({ onBack }: Props) {
           )}
         </div>
 
-        {/* Invite-only notice — gray-500 = 4.5:1 on white, acceptable for fine print */}
-        <p className="mt-4 text-xs text-center text-gray-500">
+        {/* Invite-only notice */}
+        <p className="mt-4 text-xs text-center text-gray-600 dark:text-gray-400">
           Tilgang krever invitasjon. Kontakt administrator for å opprette bruker.
         </p>
       </div>

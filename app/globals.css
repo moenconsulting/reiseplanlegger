@@ -1,33 +1,34 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
+/* ── Dark-mode class strategy ────────────────────────────────────────────── *
+ * next-themes toggles class="dark" on <html>.                                *
+ * This @variant tells Tailwind to activate dark: utilities when that class   *
+ * is present anywhere in the ancestor chain.                                 */
+@variant dark (&:where(.dark, .dark *));
 
+/* color-scheme tells the browser which chrome (scrollbars, system controls)
+ * to render. Set on both :root (light) and .dark (dark).                    */
+:root { color-scheme: light; }
+.dark  { color-scheme: dark;  }
+
+/* Map Geist font variables (loaded in layout.tsx) into Tailwind's font-sans
+ * and font-mono utilities so the browser default in @layer base also uses
+ * the correct typeface.                                                       */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  /* Keep a direct font-family declaration so older engines that don't apply
+   * the Tailwind base html rule also get Geist.                              */
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
 }
 
-/* ── Skip-to-main link (accessibility / WCAG 2.4.1) ─────────────────────── *
- * Hidden off-screen until focused via keyboard. Moves into view on :focus   *
- * so keyboard and assistive-technology users can bypass the header.         */
+/* ── Skip-to-main link (WCAG 2.4.1) ─────────────────────────────────────── *
+ * Visible only on keyboard focus; hidden off-screen otherwise.               *
+ * Hardcoded high-contrast values so it always reads even before any theme    *
+ * class is applied (avoid FOUC).                                             */
 .skip-link {
   position: absolute;
   left: -9999px;
@@ -46,4 +47,10 @@ body {
 .skip-link:focus {
   left: 1rem;
   top: 1rem;
+}
+/* Dark mode: invert to maintain contrast */
+.dark .skip-link {
+  background: #111827;
+  color: #f9fafb;
+  border-color: #f9fafb;
 }
