@@ -21,6 +21,7 @@ export default function Home() {
 
   useEffect(() => {
     // Fetch admin role for the current session.
+
     // void: called from synchronous onAuthStateChange — discard the Promise,
     // errors are caught inside.
     async function loadRole(token: string) {

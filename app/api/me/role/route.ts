@@ -4,6 +4,7 @@
 // Read-only — used exclusively to drive UI rendering (admin badge,
 // gated menu items). Does not change any authorization behaviour.
 
+
 import type { NextRequest } from "next/server"
 import { requireAuth } from "@/lib/auth-guard"
 import { checkIsAdmin } from "@/lib/is-admin"
