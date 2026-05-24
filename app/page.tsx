@@ -7,10 +7,11 @@ import SiteHeader from "@/components/site-header"
 import LoginForm from "@/components/login-form"
 import WelcomeView from "@/components/welcome-view"
 import ProfileView from "@/components/profile-view"
+import AdminView from "@/components/admin-view"
 
 // All view states for the single-page app.
 // Auth state drives which views are reachable.
-type View = "home" | "login" | "welcome" | "profile"
+type View = "home" | "login" | "welcome" | "profile" | "admin"
 
 export default function Home() {
   const [user, setUser] = useState<User | null>(null)
@@ -47,6 +48,7 @@ export default function Home() {
         onLoginClick={() => setView("login")}
         onHomeClick={() => setView("welcome")}
         onProfileClick={() => setView("profile")}
+        onAdminClick={() => setView("admin")}
         onSignOut={signOut}
       />
 
@@ -57,6 +59,7 @@ export default function Home() {
         {!user && view === "login"   && <LoginForm onBack={() => setView("home")} />}
         {user  && view === "welcome" && <WelcomeView user={user} />}
         {user  && view === "profile" && <ProfileView user={user} />}
+        {user  && view === "admin"   && <AdminView />}
       </main>
     </div>
   )
