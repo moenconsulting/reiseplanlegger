@@ -17,8 +17,23 @@ export default function Home() {
   const [user, setUser] = useState<User | null>(null)
   const [view, setView] = useState<View>("home")
   const [mounted, setMounted] = useState(false)
+  const [isAdmin, setIsAdmin] = useState(false)
 
   useEffect(() => {
+    // Fetch admin role for the current session.
+    // void: called from synchronous onAuthStateChange — discard the Promise,
+    // errors are caught inside.
+    async function loadRole(token: string) {
+      try {
+        const res = await fetch("/api/me/role", {
+          headers: { Authorization: `Bearer ${token}` },
+        })
+        setIsAdmin(res.ok && (await res.json()).isAdmin === true)
+      } catch {
+        setIsAdmin(false)
+      }
+    }
+
     // Fires immediately with current session (localStorage) and again when a
     // magic-link token in the URL hash is exchanged. Keeps view in sync.
     const { data: { subscription } } = getSupabase().auth.onAuthStateChange(
@@ -27,6 +42,12 @@ export default function Home() {
         setUser(nextUser)
         setView(nextUser ? "welcome" : "home")
         setMounted(true)
+
+        if (session?.access_token) {
+          void loadRole(session.access_token)
+        } else {
+          setIsAdmin(false) // reset on sign-out
+        }
       }
     )
     return () => subscription.unsubscribe()
@@ -45,6 +66,7 @@ export default function Home() {
       <SiteHeader
         user={user}
         view={view}
+        isAdmin={isAdmin}
         onLoginClick={() => setView("login")}
         onHomeClick={() => setView("welcome")}
         onProfileClick={() => setView("profile")}

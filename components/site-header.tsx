@@ -6,6 +6,9 @@ import type { User } from "@supabase/supabase-js"
 type Props = {
   user: User | null
   view: string
+  /** Whether the logged-in user has admin access. Drives badge visibility
+   *  and the "Send invitasjon" menu item. Defaults to false (non-admin). */
+  isAdmin: boolean
   onLoginClick: () => void
   onHomeClick: () => void
   onProfileClick: () => void
@@ -18,9 +21,82 @@ type Props = {
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
 
+// ── Inline SVG atoms ─────────────────────────────────────────────────────────
+// All SVGs carry aria-hidden="true"; meaningful labels are on the parent
+// interactive element or in accompanying visible/sr-only text.
+
+function PersonIcon() {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="16" height="16"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <circle cx="12" cy="8" r="4" />
+      <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
+    </svg>
+  )
+}
+
+/**
+ * Shield icon used as the admin role badge.
+ * Two sizes:
+ *   "sm"  → 12 × 12 px  inside the profile trigger button
+ *   "xs"  → 10 × 10 px  inside the dropdown identity row
+ */
+function ShieldIcon({ size = "sm" }: { size?: "xs" | "sm" }) {
+  const px = size === "xs" ? 10 : 12
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width={px} height={px}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  )
+}
+
+function ChevronIcon({ open }: { open: boolean }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="12" height="12"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+      className={[
+        "transition-transform duration-150",
+        open ? "rotate-180" : "",
+      ].join(" ")}
+    >
+      <path d="M6 9l6 6 6-6" />
+    </svg>
+  )
+}
+
+// ── Component ─────────────────────────────────────────────────────────────────
+
 export default function SiteHeader({
   user,
   view,
+  isAdmin,
   onLoginClick,
   onHomeClick,
   onProfileClick,
@@ -28,8 +104,8 @@ export default function SiteHeader({
   onSignOut,
 }: Props) {
   const [profileOpen, setProfileOpen] = useState(false)
-  const wrapperRef  = useRef<HTMLDivElement>(null)
-  const triggerRef  = useRef<HTMLButtonElement>(null)
+  const wrapperRef   = useRef<HTMLDivElement>(null)
+  const triggerRef   = useRef<HTMLButtonElement>(null)
   const firstItemRef = useRef<HTMLButtonElement>(null)
 
   // Close on Escape → return focus to trigger
@@ -123,8 +199,16 @@ export default function SiteHeader({
         )}
 
         {/* Logged-in: profile control + dropdown ──────────────────────────
-         * The wrapper div is the click-outside boundary.                   *
-         * aria-expanded + aria-haspopup communicate state to screen readers */}
+         *
+         * Admin visual distinction (WCAG 1.4.1 — not colour alone):
+         *   Trigger  — blue-700 shield icon + sr-only "Administrator" text
+         *              between the person icon and email; blue-200 border.
+         *   Dropdown — shield icon + visible "Administrator" label in the
+         *              identity row (blue-700).
+         *   a11y     — aria-label prefixed with "Administrator" for admins.
+         *
+         * Non-admin users see the plain trigger with gray-300 border and no
+         * badge; "Send invitasjon" is hidden from the dropdown entirely.    */}
         {user && (
           <div ref={wrapperRef} className="relative">
             <button
@@ -132,51 +216,39 @@ export default function SiteHeader({
               onClick={() => setProfileOpen((o) => !o)}
               aria-expanded={profileOpen}
               aria-haspopup="true"
-              aria-label={`Profil for ${user.email} – åpne profil-meny`}
+              aria-label={
+                isAdmin
+                  ? `Administrator – profil for ${user.email} – åpne profil-meny`
+                  : `Profil for ${user.email} – åpne profil-meny`
+              }
               className={[
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-gray-300",
-                "text-gray-900 hover:bg-gray-50 transition-colors text-sm",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors text-sm text-gray-900",
+                isAdmin
+                  ? "border-blue-200 hover:bg-blue-50"
+                  : "border-gray-300 hover:bg-gray-50",
                 focusRing,
               ].join(" ")}
             >
-              {/* Person icon — inline SVG, no extra dependency */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="16" height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-              >
-                <circle cx="12" cy="8" r="4" />
-                <path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" />
-              </svg>
+              <PersonIcon />
+
+              {/* Admin role badge ─────────────────────────────────────────
+               * icon (aria-hidden) + sr-only text satisfies WCAG 1.4.1:
+               * information is not conveyed by colour alone.              */}
+              {isAdmin && (
+                <span className="text-blue-700 flex items-center" aria-hidden="true">
+                  <ShieldIcon size="sm" />
+                </span>
+              )}
+              {/* Screen-reader-only role announcement lives here so it is
+                  always announced as part of the button label, regardless
+                  of the viewport width that hides the email span below.   */}
+              {isAdmin && <span className="sr-only">Administrator –</span>}
 
               <span className="hidden sm:block max-w-[160px] truncate">
                 {user.email}
               </span>
 
-              {/* Chevron — rotates when open */}
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="12" height="12"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2.5"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                aria-hidden="true"
-                className={[
-                  "transition-transform duration-150",
-                  profileOpen ? "rotate-180" : "",
-                ].join(" ")}
-              >
-                <path d="M6 9l6 6 6-6" />
-              </svg>
+              <ChevronIcon open={profileOpen} />
             </button>
 
             {/* ── Profile dropdown panel ──────────────────────────────────
@@ -192,6 +264,15 @@ export default function SiteHeader({
                 {/* Identity row */}
                 <div className="px-4 py-2 border-b border-gray-100 mb-1">
                   <p className="text-xs text-gray-500 mb-0.5">Innlogget som</p>
+
+                  {/* Administrator badge — icon + text label (not colour alone) */}
+                  {isAdmin && (
+                    <p className="flex items-center gap-1 text-xs font-semibold text-blue-700 mb-1">
+                      <ShieldIcon size="xs" />
+                      Administrator
+                    </p>
+                  )}
+
                   {/* explicit text-gray-900 prevents invisible text if background
                       ever changes — contrast 19.6:1 on white (WCAG AA ✓)       */}
                   <p className="text-sm font-medium text-gray-900 break-all">
@@ -212,17 +293,22 @@ export default function SiteHeader({
                   Vis kontoinformasjon
                 </button>
 
-                <button
-                  role="menuitem"
-                  onClick={() => closeAndNavigate(onAdminClick)}
-                  className={[
-                    "w-full text-left px-4 py-2 text-sm text-gray-700",
-                    "hover:bg-gray-50 transition-colors",
-                    focusRing,
-                  ].join(" ")}
-                >
-                  Send invitasjon
-                </button>
+                {/* Admin-only action ─────────────────────────────────────
+                 * Hidden for non-admin users so they never see or reach it.
+                 * Server-side auth still enforces access independently.   */}
+                {isAdmin && (
+                  <button
+                    role="menuitem"
+                    onClick={() => closeAndNavigate(onAdminClick)}
+                    className={[
+                      "w-full text-left px-4 py-2 text-sm text-gray-700",
+                      "hover:bg-gray-50 transition-colors",
+                      focusRing,
+                    ].join(" ")}
+                  >
+                    Send invitasjon
+                  </button>
+                )}
 
                 {/* Divider before destructive action */}
                 <div className="my-1 border-t border-gray-100" role="separator" />
