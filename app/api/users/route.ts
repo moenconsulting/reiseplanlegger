@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
 import { requireAuth } from "@/lib/auth-guard"
-import { supabaseAdmin } from "@/lib/supabase-admin"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 // GET /api/users — hent alle brukere
 export async function GET(req: NextRequest) {
@@ -9,7 +9,7 @@ export async function GET(req: NextRequest) {
     return Response.json({ error: "Ikke autorisert" }, { status: 401 })
   }
 
-  const { data, error } = await supabaseAdmin.auth.admin.listUsers()
+  const { data, error } = await getSupabaseAdmin().auth.admin.listUsers()
   if (error) {
     return Response.json({ error: error.message }, { status: 500 })
   }

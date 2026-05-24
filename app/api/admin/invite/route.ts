@@ -1,11 +1,11 @@
 // POST /api/admin/invite
 //
-// SECURITY: uses supabaseAdmin (service-role key) — server-only.
+// SECURITY: uses getSupabaseAdmin() (service-role key) — server-only.
 // Never import this route handler in client code.
 
 import type { NextRequest } from "next/server"
 import { requireAuth } from "@/lib/auth-guard"
-import { supabaseAdmin } from "@/lib/supabase-admin"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 // ---------------------------------------------------------------------------
 // Allowlist
@@ -65,7 +65,7 @@ export async function POST(req: NextRequest) {
   }
 
   // ── 5. Send invite via Supabase Admin API ─────────────────────────────────
-  const { error } = await supabaseAdmin.auth.admin.inviteUserByEmail(email)
+  const { error } = await getSupabaseAdmin().auth.admin.inviteUserByEmail(email)
 
   if (error) {
     // Log message only — never log keys or tokens

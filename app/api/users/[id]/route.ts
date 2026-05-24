@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server"
 import { requireAuth } from "@/lib/auth-guard"
-import { supabaseAdmin } from "@/lib/supabase-admin"
+import { getSupabaseAdmin } from "@/lib/supabase-admin"
 
 type Context = { params: Promise<{ id: string }> }
 
@@ -12,7 +12,7 @@ export async function GET(req: NextRequest, { params }: Context) {
   }
 
   const { id } = await params
-  const { data, error } = await supabaseAdmin.auth.admin.getUserById(id)
+  const { data, error } = await getSupabaseAdmin().auth.admin.getUserById(id)
   if (error) {
     return Response.json({ error: error.message }, { status: 404 })
   }
@@ -55,7 +55,7 @@ export async function PUT(req: NextRequest, { params }: Context) {
     return Response.json({ error: "Ingen gyldige felter å oppdatere (email, user_metadata)" }, { status: 400 })
   }
 
-  const { data, error } = await supabaseAdmin.auth.admin.updateUserById(id, updates)
+  const { data, error } = await getSupabaseAdmin().auth.admin.updateUserById(id, updates)
   if (error) {
     return Response.json({ error: error.message }, { status: 400 })
   }
@@ -71,7 +71,7 @@ export async function DELETE(req: NextRequest, { params }: Context) {
   }
 
   const { id } = await params
-  const { error } = await supabaseAdmin.auth.admin.deleteUser(id)
+  const { error } = await getSupabaseAdmin().auth.admin.deleteUser(id)
   if (error) {
     return Response.json({ error: error.message }, { status: 400 })
   }

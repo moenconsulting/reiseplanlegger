@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { supabase } from "@/lib/supabase"
+import { getSupabase } from "@/lib/supabase"
 
 const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
@@ -22,7 +22,7 @@ export default function AdminView() {
       // Retrieve the current session to get the bearer token.
       // This is the same pattern used by all other authenticated API calls
       // in this app (Authorization: Bearer <access_token>).
-      const { data: { session } } = await supabase.auth.getSession()
+      const { data: { session } } = await getSupabase().auth.getSession()
       if (!session) {
         setResult({ ok: false, message: "Ikke innlogget — logg inn og prøv igjen" })
         return
