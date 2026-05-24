@@ -6,19 +6,7 @@
 import type { NextRequest } from "next/server"
 import { requireAuth } from "@/lib/auth-guard"
 import { getSupabaseAdmin } from "@/lib/supabase-admin"
-
-// ---------------------------------------------------------------------------
-// Allowlist
-// Set ADMIN_EMAILS as a comma-separated env var to restrict who can invite.
-// Example: ADMIN_EMAILS=hugo@moen-consulting.no,other@example.com
-//
-// If the var is empty or unset, any authenticated user may send invites.
-// For production, always configure ADMIN_EMAILS.
-// ---------------------------------------------------------------------------
-const ADMIN_EMAILS: string[] = (process.env.ADMIN_EMAILS ?? "")
-  .split(",")
-  .map((e) => e.trim().toLowerCase())
-  .filter(Boolean)
+import { checkIsAdmin } from "@/lib/is-admin"
 
 /** Minimal email-format sanity check — not a full RFC 5322 validator. */
 function isValidEmail(email: string): boolean {
@@ -32,14 +20,11 @@ export async function POST(req: NextRequest) {
     return Response.json({ error: "Ikke autorisert" }, { status: 401 })
   }
 
-  // ── 2. Allowlist check (when configured) ──────────────────────────────────
-  if (ADMIN_EMAILS.length > 0) {
-    const callerEmail = (caller.email ?? "").toLowerCase()
-    if (!ADMIN_EMAILS.includes(callerEmail)) {
-      // Log the attempted email for auditing — not a secret value
-      console.error(`[invite] Forbidden: ${callerEmail} is not in ADMIN_EMAILS allowlist`)
-      return Response.json({ error: "Ikke autorisert" }, { status: 403 })
-    }
+  // ── 2. Allowlist check ────────────────────────────────────────────────────
+  if (!checkIsAdmin(caller.email)) {
+    // Log the attempted email for auditing — not a secret value
+    console.error(`[invite] Forbidden: ${caller.email ?? "unknown"} is not in ADMIN_EMAILS allowlist`)
+    return Response.json({ error: "Ikke autorisert" }, { status: 403 })
   }
 
   // ── 3. Parse body ─────────────────────────────────────────────────────────
