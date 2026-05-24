@@ -1,8 +1,9 @@
 // GET /api/me/role
 //
 // Returns { isAdmin: boolean } for the authenticated caller.
-// Used by the client to conditionally render admin UI without
-// exposing the ADMIN_EMAILS list to the browser.
+// Read-only — used exclusively to drive UI rendering (admin badge,
+// gated menu items). Does not change any authorization behaviour.
+
 
 import type { NextRequest } from "next/server"
 import { requireAuth } from "@/lib/auth-guard"

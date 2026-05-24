@@ -21,7 +21,9 @@ export default function Home() {
 
   useEffect(() => {
     // Fetch admin role for the current session.
-    // Fire-and-forget — called from the synchronous onAuthStateChange callback.
+
+    // void: called from synchronous onAuthStateChange — discard the Promise,
+    // errors are caught inside.
     async function loadRole(token: string) {
       try {
         const res = await fetch("/api/me/role", {
@@ -45,7 +47,7 @@ export default function Home() {
         if (session?.access_token) {
           void loadRole(session.access_token)
         } else {
-          setIsAdmin(false)
+          setIsAdmin(false) // reset on sign-out
         }
       }
     )

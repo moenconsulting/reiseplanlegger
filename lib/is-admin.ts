@@ -1,9 +1,12 @@
-// Server-only helper — safe to import in Route Handlers.
-// Do NOT import this in "use client" code (env var is server-only).
+
+// Server-only helper — never import in "use client" code.
 //
-// ADMIN_EMAILS: comma-separated list of email addresses that have admin
-// access. If unset or empty, all authenticated users are treated as admins
-// (matches the original invite-route behaviour — no restriction configured).
+// ADMIN_EMAILS: comma-separated env var of email addresses with admin access.
+// When unset / empty, all authenticated users are treated as admins (matches
+// the existing invite-route behaviour — no restriction configured).
+//
+// Authorization logic in individual routes is intentionally unchanged;
+// this file only centralises the read-only admin check for UI purposes.
 
 const ADMIN_EMAILS: string[] = (process.env.ADMIN_EMAILS ?? "")
   .split(",")
@@ -11,7 +14,7 @@ const ADMIN_EMAILS: string[] = (process.env.ADMIN_EMAILS ?? "")
   .filter(Boolean)
 
 /**
- * Returns true if the given email has admin access.
+ * Returns true if the given email address has admin access.
  * When ADMIN_EMAILS is not configured every authenticated user is an admin.
  */
 export function checkIsAdmin(email: string | null | undefined): boolean {

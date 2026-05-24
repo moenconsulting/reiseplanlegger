@@ -6,6 +6,8 @@ import type { User } from "@supabase/supabase-js"
 type Props = {
   user: User | null
   view: string
+  /** Whether the logged-in user has admin access. Drives badge visibility
+   *  and the "Send invitasjon" menu item. Defaults to false (non-admin). */
   isAdmin: boolean
   onLoginClick: () => void
   onHomeClick: () => void
@@ -20,8 +22,9 @@ const focusRing =
   "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2"
 
 // ── Inline SVG atoms ─────────────────────────────────────────────────────────
+// All SVGs carry aria-hidden="true"; meaningful labels are on the parent
+// interactive element or in accompanying visible/sr-only text.
 
-/** Standard person silhouette. */
 function PersonIcon() {
   return (
     <svg
@@ -42,9 +45,10 @@ function PersonIcon() {
 }
 
 /**
- * Shield icon — used as the admin role badge.
- * size="sm"  → 12×12  (profile trigger button)
- * size="xs"  → 10×10  (dropdown identity row)
+ * Shield icon used as the admin role badge.
+ * Two sizes:
+ *   "sm"  → 12 × 12 px  inside the profile trigger button
+ *   "xs"  → 10 × 10 px  inside the dropdown identity row
  */
 function ShieldIcon({ size = "sm" }: { size?: "xs" | "sm" }) {
   const px = size === "xs" ? 10 : 12
@@ -65,7 +69,6 @@ function ShieldIcon({ size = "sm" }: { size?: "xs" | "sm" }) {
   )
 }
 
-/** Animated chevron — rotates 180° when the dropdown is open. */
 function ChevronIcon({ open }: { open: boolean }) {
   return (
     <svg
@@ -78,7 +81,10 @@ function ChevronIcon({ open }: { open: boolean }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden="true"
-      className={["transition-transform duration-150", open ? "rotate-180" : ""].join(" ")}
+      className={[
+        "transition-transform duration-150",
+        open ? "rotate-180" : "",
+      ].join(" ")}
     >
       <path d="M6 9l6 6 6-6" />
     </svg>
@@ -193,13 +199,16 @@ export default function SiteHeader({
         )}
 
         {/* Logged-in: profile control + dropdown ──────────────────────────
-         * The wrapper div is the click-outside boundary.                   *
-         * aria-expanded + aria-haspopup communicate state to screen readers.
          *
-         * Admin distinction (WCAG 1.4.1 — not colour alone):
-         *   • Visual: blue-700 shield icon visible in trigger + dropdown
-         *   • Text:   "Administrator" label in the dropdown identity row
-         *   • SR:     aria-label prefixed with "Administrator" for admins  */}
+         * Admin visual distinction (WCAG 1.4.1 — not colour alone):
+         *   Trigger  — blue-700 shield icon + sr-only "Administrator" text
+         *              between the person icon and email; blue-200 border.
+         *   Dropdown — shield icon + visible "Administrator" label in the
+         *              identity row (blue-700).
+         *   a11y     — aria-label prefixed with "Administrator" for admins.
+         *
+         * Non-admin users see the plain trigger with gray-300 border and no
+         * badge; "Send invitasjon" is hidden from the dropdown entirely.    */}
         {user && (
           <div ref={wrapperRef} className="relative">
             <button
@@ -213,22 +222,27 @@ export default function SiteHeader({
                   : `Profil for ${user.email} – åpne profil-meny`
               }
               className={[
-                "flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors text-sm",
+                "flex items-center gap-1.5 px-3 py-1.5 rounded-full border transition-colors text-sm text-gray-900",
                 isAdmin
-                  ? "border-blue-200 text-gray-900 hover:bg-blue-50"
-                  : "border-gray-300 text-gray-900 hover:bg-gray-50",
+                  ? "border-blue-200 hover:bg-blue-50"
+                  : "border-gray-300 hover:bg-gray-50",
                 focusRing,
               ].join(" ")}
             >
               <PersonIcon />
 
-              {/* Admin shield badge — icon + sr-only text satisfies WCAG 1.4.1 */}
+              {/* Admin role badge ─────────────────────────────────────────
+               * icon (aria-hidden) + sr-only text satisfies WCAG 1.4.1:
+               * information is not conveyed by colour alone.              */}
               {isAdmin && (
-                <span className="text-blue-700 flex items-center">
+                <span className="text-blue-700 flex items-center" aria-hidden="true">
                   <ShieldIcon size="sm" />
-                  <span className="sr-only">Administrator</span>
                 </span>
               )}
+              {/* Screen-reader-only role announcement lives here so it is
+                  always announced as part of the button label, regardless
+                  of the viewport width that hides the email span below.   */}
+              {isAdmin && <span className="sr-only">Administrator –</span>}
 
               <span className="hidden sm:block max-w-[160px] truncate">
                 {user.email}
@@ -251,7 +265,7 @@ export default function SiteHeader({
                 <div className="px-4 py-2 border-b border-gray-100 mb-1">
                   <p className="text-xs text-gray-500 mb-0.5">Innlogget som</p>
 
-                  {/* Administrator role badge — icon + text, not colour alone */}
+                  {/* Administrator badge — icon + text label (not colour alone) */}
                   {isAdmin && (
                     <p className="flex items-center gap-1 text-xs font-semibold text-blue-700 mb-1">
                       <ShieldIcon size="xs" />
@@ -279,7 +293,9 @@ export default function SiteHeader({
                   Vis kontoinformasjon
                 </button>
 
-                {/* Admin-only action — hidden from non-admin users */}
+                {/* Admin-only action ─────────────────────────────────────
+                 * Hidden for non-admin users so they never see or reach it.
+                 * Server-side auth still enforces access independently.   */}
                 {isAdmin && (
                   <button
                     role="menuitem"
