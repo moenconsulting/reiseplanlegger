@@ -70,26 +70,32 @@ export default function WelcomeView({ user }: Props) {
     setErrors({})
     setIsSubmitting(true)
 
-    const { error } = await getSupabase().from("trips").insert({
-      title: validationResult.data.title,
-      start_date: validationResult.data.start_date,
-      end_date: validationResult.data.end_date,
-      user_id: user.id,
-    })
+    try{
+      const { error } = await getSupabase().from("trips").insert({
+        title: validationResult.data.title,
+        start_date: validationResult.data.start_date,
+        end_date: validationResult.data.end_date,
+        user_id: user.id,
+      })
 
-    setIsSubmitting(false)
+      setIsSubmitting(false)
 
-    if (error) {
-      setSubmitError(error.message)
-      return
+      if (error) {
+        setSubmitError(error.message)
+        return
+      }
+
+      setFormValues(initialValues)
+      setSuccessToast("Reisen ble opprettet")
+
+      window.setTimeout(() => {
+        setSuccessToast(null)
+      }, 3000)
+    } catch {
+      setSubmitError("Noe gikk galt. Prøv igjen.")
+    } finally {
+      setIsSubmitting(false)
     }
-
-    setFormValues(initialValues)
-    setSuccessToast("Reisen ble opprettet")
-
-    window.setTimeout(() => {
-      setSuccessToast(null)
-    }, 3000)
   }
 
   return (
