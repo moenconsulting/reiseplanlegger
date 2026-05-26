@@ -91,11 +91,11 @@ export default function WelcomeView({ user }: Props) {
       window.setTimeout(() => {
         setSuccessToast(null)
       }, 3000)
-    } catch {
-      setSubmitError("Noe gikk galt. Prøv igjen.")
-    } finally {
-      setIsSubmitting(false)
-    }
+  } catch {
+    setSubmitError("Noe gikk galt. Prøv igjen.")
+  } finally {
+  setIsSubmitting(false)
+  }
   }
 
   return (
