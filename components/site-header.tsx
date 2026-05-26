@@ -12,6 +12,7 @@ type Props = {
   isAdmin: boolean
   onLoginClick: () => void
   onHomeClick: () => void
+  onTripsClick: () => void
   onProfileClick: () => void
   onAdminClick: () => void
   onSignOut: () => void
@@ -101,6 +102,7 @@ export default function SiteHeader({
   isAdmin,
   onLoginClick,
   onHomeClick,
+  onTripsClick,
   onProfileClick,
   onAdminClick,
   onSignOut,
@@ -167,7 +169,7 @@ export default function SiteHeader({
 
       {/* ── In-app nav (logged in) ────────────────────────────────────────── */}
       {user && (
-        <nav aria-label="Sidenavigasjon" className="flex items-center">
+        <nav aria-label="Sidenavigasjon" className="flex items-center gap-1">
           <button
             onClick={onHomeClick}
             aria-current={view === "welcome" ? "page" : undefined}
@@ -182,6 +184,20 @@ export default function SiteHeader({
             ].join(" ")}
           >
             Hjem
+          </button>
+
+          <button
+            onClick={onTripsClick}
+            aria-current={view === "trips" ? "page" : undefined}
+            className={[
+              "text-sm px-3 py-1.5 rounded transition-colors",
+              focusRing,
+              view === "trips"
+                ? "bg-blue-700 dark:bg-blue-600 text-white"
+                : "text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800",
+            ].join(" ")}
+          >
+            Reiser
           </button>
         </nav>
       )}

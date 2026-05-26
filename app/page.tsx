@@ -70,6 +70,9 @@ export default function Home() {
         isAdmin={isAdmin}
         onLoginClick={() => setView("login")}
         onHomeClick={() => setView("welcome")}
+        onTripsClick={() => {
+          window.location.assign("/trips")
+        }}
         onProfileClick={() => setView("profile")}
         onAdminClick={() => setView("admin")}
         onSignOut={signOut}
