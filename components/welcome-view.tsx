@@ -46,7 +46,7 @@ const tripSchema = z
   )
 
 export default function WelcomeView({ user }: Props) {
-  // Prefer a display name from user_metadata, fall back to email
+  // Foretrekk visningsnavn fra user_metadata, ellers bruk e-post
   const name = (user.user_metadata?.full_name as string | undefined) ?? user.email
 
   const [formValues, setFormValues] = useState<TripFormValues>(initialValues)
