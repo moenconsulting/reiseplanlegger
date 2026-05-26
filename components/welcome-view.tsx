@@ -1,6 +1,7 @@
 "use client"
 
-import { useState } from "react"
+import { useCallback, useEffect, useState } from "react"
+import Link from "next/link"
 import type { User } from "@supabase/supabase-js"
 import { z } from "zod"
 import { getSupabase } from "@/lib/supabase"
@@ -10,6 +11,13 @@ type Props = {
 }
 
 type TripFormValues = {
+  title: string
+  start_date: string
+  end_date: string
+}
+
+type TripListItem = {
+  id: string
   title: string
   start_date: string
   end_date: string
@@ -46,6 +54,34 @@ export default function WelcomeView({ user }: Props) {
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [successToast, setSuccessToast] = useState<string | null>(null)
+  const [trips, setTrips] = useState<TripListItem[]>([])
+  const [isLoadingTrips, setIsLoadingTrips] = useState(true)
+
+  const loadTrips = useCallback(async (showLoading = false) => {
+    if (showLoading) {
+      setIsLoadingTrips(true)
+    }
+
+    const { data, error } = await getSupabase()
+      .from("trips")
+      .select("id,title,start_date,end_date")
+      .eq("user_id", user.id)
+
+    if (error) {
+      setTrips([])
+      setIsLoadingTrips(false)
+      return
+    }
+
+    setTrips((data as TripListItem[] | null) ?? [])
+    setIsLoadingTrips(false)
+  }, [user.id])
+
+  useEffect(() => {
+    queueMicrotask(() => {
+      void loadTrips(false)
+    })
+  }, [loadTrips])
 
   function updateField(field: keyof TripFormValues, value: string) {
     setFormValues((prev) => ({ ...prev, [field]: value }))
@@ -87,6 +123,7 @@ export default function WelcomeView({ user }: Props) {
 
       setFormValues(initialValues)
       setSuccessToast("Reisen ble opprettet")
+      await loadTrips(true)
 
       window.setTimeout(() => {
         setSuccessToast(null)
@@ -111,6 +148,7 @@ export default function WelcomeView({ user }: Props) {
       </p>
 
       <form
+        id="new-trip-form"
         onSubmit={handleSubmit}
         className="mt-8 rounded-2xl border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
         noValidate
@@ -199,6 +237,44 @@ export default function WelcomeView({ user }: Props) {
           </div>
         </div>
       </form>
+
+      <section className="mt-8" aria-labelledby="trip-list-heading">
+        <h2 id="trip-list-heading" className="text-xl font-semibold text-gray-900 dark:text-gray-50">
+          Dine reiser
+        </h2>
+
+        {isLoadingTrips ? (
+          <p className="mt-3 text-sm text-gray-600 dark:text-gray-400" aria-live="polite">
+            Laster reiser...
+          </p>
+        ) : trips.length === 0 ? (
+          <div className="mt-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-5 dark:border-gray-600 dark:bg-gray-800">
+            <p className="text-sm text-gray-700 dark:text-gray-200">Du har ingen reiser ennå</p>
+            <a
+              href="#new-trip-form"
+              className="mt-3 inline-flex items-center rounded-lg bg-blue-700 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500"
+            >
+              Opprett din første reise
+            </a>
+          </div>
+        ) : (
+          <ul className="mt-4 grid gap-3">
+            {trips.map((trip) => (
+              <li key={trip.id}>
+                <Link
+                  href={`/trips/${trip.id}`}
+                  className="block rounded-xl border border-gray-200 bg-white p-4 transition hover:border-blue-300 hover:shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 dark:border-gray-700 dark:bg-gray-800 dark:hover:border-blue-500"
+                >
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-gray-50">{trip.title}</h3>
+                  <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                    {trip.start_date} - {trip.end_date}
+                  </p>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       {successToast && (
         <div
